@@ -1,2 +1,10 @@
-# workshop_mds_2
-Workshop My Digital School (Juin 2025)
+# Projet Workshop MyDigitalSchool (Juin 2025)
+
+## Membres
+- Jérôme
+- Florian
+- Esteban
+
+## Description
+
+## Lancement du projet
