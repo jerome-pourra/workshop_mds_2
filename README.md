@@ -9,7 +9,7 @@
 
 ## Lancement du projet
 
-## Guide de contribution – Workflow Git
+## Guide de contribution
 
 Voici les règles à suivre pour collaborer efficacement au développement.
 
