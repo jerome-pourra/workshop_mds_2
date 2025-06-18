@@ -11,7 +11,7 @@
 
 ## Guide de contribution – Workflow Git
 
-Bienvenue dans le dépôt du projet ! Voici les règles à suivre pour collaborer efficacement au développement.
+Voici les règles à suivre pour collaborer efficacement au développement.
 
 ### Branches principales
 
@@ -59,4 +59,4 @@ Bienvenue dans le dépôt du projet ! Voici les règles à suivre pour collabore
 - Les MRs vers `devlop` doivent être **relues et validées par Florian, Esteban et Jérôme**.
 - `master` représente la **version en production**, à ne modifier que via des MRs depuis `devlop`.
 
-Merci de respecter ce processus afin de garantir la qualité et la stabilité du projet.
+Merci de respecter **dans la mesure du possible** ce processus afin de garantir la qualité et la stabilité du projet.
