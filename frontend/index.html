@@ -1,24 +1,49 @@
 <!doctype html>
 <html lang="fr">
-  <head>
-    <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Vite App</title>
-    <link rel="stylesheet" href="/src/style.css" />
-  </head>
-  <body>
-    <!-- Loader plein écran -->
-    <div class="loader" id="loader">
-      <img src="/src/img/image-removebg-preview.png" alt="Logo" />
-    </div>
 
-    <!-- Application cachée pendant le chargement -->
-    <div id="app" style="display:none;" class="animate-bottom">
-      <h1>Bienvenue</h1>
-      <p>Contenu chargé avec succès.</p>
-    </div>
+<head>
+  <meta charset="UTF-8" />
+  <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Créer un appel</title>
+  <link rel="stylesheet" href="createCall.css" />
+</head>
 
-    <script type="module" src="/src/main.js"></script>
-  </body>
+<body>
+  <!-- Loader plein écran -->
+  <div class="loader" id="loader">
+    <img src="/src/img/image-removebg-preview.png" alt="Logo" />
+  </div>
+
+  <!-- Application cachée pendant le chargement -->
+  <div id="app" style="display:none;" class="animate-bottom">
+    <div class="container">
+      <form class="form">
+        <h2>Créer un appel</h2>
+        <label for="prenom">Prénom</label>
+        <input type="text" id="prenom" placeholder="Entrer votre prénom" />
+
+        <label for="nom">Nom</label>
+        <input type="text" id="nom" placeholder="Entrer votre nom" />
+
+        <h2>Paramètre de l’appel</h2>
+        <label for="participants">Number of participants</label>
+        <select id="participants">
+          <option>Sélectionner un nombre</option>
+          <option>2</option>
+          <option>3</option>
+          <option>4</option>
+        </select>
+
+        <label for="callname">Nom</label>
+        <input type="text" id="callname" placeholder="Entrer le nom de l’appel" />
+
+        <button type="submit">Rejoindre l’appel</button>
+      </form>
+    </div>
+  </div>
+
+  <script type="module" src="/src/main.js"></script>
+</body>
+
 </html>
