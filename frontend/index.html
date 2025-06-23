@@ -1,13 +1,24 @@
 <!doctype html>
-<html lang="en">
+<html lang="fr">
   <head>
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/vite.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Vite App</title>
+    <link rel="stylesheet" href="/src/style.css" />
   </head>
   <body>
-    <div id="app"></div>
+    <!-- Loader plein écran -->
+    <div class="loader" id="loader">
+      <img src="/src/img/image-removebg-preview.png" alt="Logo" />
+    </div>
+
+    <!-- Application cachée pendant le chargement -->
+    <div id="app" style="display:none;" class="animate-bottom">
+      <h1>Bienvenue</h1>
+      <p>Contenu chargé avec succès.</p>
+    </div>
+
     <script type="module" src="/src/main.js"></script>
   </body>
 </html>
