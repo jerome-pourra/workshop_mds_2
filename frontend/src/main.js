@@ -1,3 +1,4 @@
+import './createCall.css'
 import './style.css'
 
 window.addEventListener('load', () => {
