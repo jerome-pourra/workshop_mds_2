@@ -5,7 +5,7 @@ window.addEventListener('load', () => {
   setTimeout(() => {
     document.getElementById("loader").style.display = "none";
     document.getElementById("app").style.display = "block";
-  }, 3000);
+  }, 1000);
 });
 
 const muteButton = document.getElementById('mute-button');
