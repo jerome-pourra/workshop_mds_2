@@ -29,4 +29,3 @@ export class TranscribeConversationDto {
   @ApiProperty({ default: 'uuid' })
   userId: string;
 }
-

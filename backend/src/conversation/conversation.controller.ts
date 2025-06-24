@@ -1,4 +1,13 @@
-import { Controller, Get, Post, Body, Param, Delete, UploadedFile, UseInterceptors } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Param,
+  Delete,
+  UploadedFile,
+  UseInterceptors,
+} from '@nestjs/common';
 import { ConversationService } from './conversation.service';
 import {
   CreateConversationDto,
@@ -20,10 +29,10 @@ export class ConversationController {
     'audio/oga',
     'audio/ogg',
     'audio/wav',
-    'audio/webm'
+    'audio/webm',
   ];
 
-  constructor(private readonly conversationService: ConversationService) { }
+  constructor(private readonly conversationService: ConversationService) {}
 
   @Post()
   create(@Body() createConversationDto: CreateConversationDto) {
@@ -47,19 +56,21 @@ export class ConversationController {
   }
 
   @Post(':uuid/audio')
-  @UseInterceptors(FileInterceptor('file', {
-    limits: { fileSize: ConversationController.MAX_FILE_SIZE },
-    dest: './uploads',
-    fileFilter: (req, file, cb) => {
-      console.log(file.mimetype);
+  @UseInterceptors(
+    FileInterceptor('file', {
+      limits: { fileSize: ConversationController.MAX_FILE_SIZE },
+      dest: './uploads',
+      fileFilter: (req, file, cb) => {
+        console.log(file.mimetype);
 
-      if (ConversationController.ALLOWED_FILE_TYPES.includes(file.mimetype)) {
-        cb(null, true);
-      } else {
-        cb(new Error(`Unsupported file type: ${file.mimetype}`), false);
-      }
-    }
-  }))
+        if (ConversationController.ALLOWED_FILE_TYPES.includes(file.mimetype)) {
+          cb(null, true);
+        } else {
+          cb(new Error(`Unsupported file type: ${file.mimetype}`), false);
+        }
+      },
+    }),
+  )
   audio(
     @Param('uuid') uuid: string,
     @Body('userId') userId: string,
@@ -72,7 +83,10 @@ export class ConversationController {
   }
 
   @Post(':uuid/transcribe')
-  transcribe(@Param('uuid') uuid: string, @Body() body: TranscribeConversationDto) {
+  transcribe(
+    @Param('uuid') uuid: string,
+    @Body() body: TranscribeConversationDto,
+  ) {
     return this.conversationService.transcribe(uuid, body);
   }
 

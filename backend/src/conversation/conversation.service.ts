@@ -25,7 +25,8 @@ export class ConversationService {
 
   constructor() {
     this.openai = new OpenAI({
-      apiKey: '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',
+      apiKey:
+        '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',
     });
   }
 
@@ -93,13 +94,18 @@ export class ConversationService {
     return conversation;
   }
 
-  audio(uuid: string, audioConversationDto: AudioConversationDto): Conversation {
+  audio(
+    uuid: string,
+    audioConversationDto: AudioConversationDto,
+  ): Conversation {
     const conversation = this.conversations.find((conv) => conv.uuid === uuid);
     if (!conversation) {
       throw new NotFoundException(`Conversation with uuid ${uuid} not found`);
     }
     const user = this.userService.findOne(audioConversationDto.userId);
-    const participant = conversation.members.find((member) => member.uuid === user.uuid);
+    const participant = conversation.members.find(
+      (member) => member.uuid === user.uuid,
+    );
     if (!participant) {
       throw new NotFoundException(
         `User with uuid ${user.uuid} is not a participant in this conversation`,
@@ -115,13 +121,18 @@ export class ConversationService {
     return conversation;
   }
 
-  async transcribe(uuid: string, audioConversationDto: TranscribeConversationDto): Promise<{ transcription: string }> {
+  async transcribe(
+    uuid: string,
+    audioConversationDto: TranscribeConversationDto,
+  ): Promise<{ transcription: string }> {
     const conversation = this.conversations.find((conv) => conv.uuid === uuid);
     if (!conversation) {
       throw new NotFoundException(`Conversation with uuid ${uuid} not found`);
     }
     const user = this.userService.findOne(audioConversationDto.userId);
-    const participant = conversation.members.find((member) => member.uuid === user.uuid);
+    const participant = conversation.members.find(
+      (member) => member.uuid === user.uuid,
+    );
     if (!participant) {
       throw new NotFoundException(
         `User with uuid ${user.uuid} is not a participant in this conversation`,

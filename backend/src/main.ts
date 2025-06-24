@@ -3,7 +3,6 @@ import { AppModule } from './app.module';
 import { Logger, ValidationPipe } from '@nestjs/common';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { getWifiIpv4Address } from './tools/network';
-import { json, urlencoded } from 'express';
 
 async function bootstrap() {
   const APP_PORT = 3000;
