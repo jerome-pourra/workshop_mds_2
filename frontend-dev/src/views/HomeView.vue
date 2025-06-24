@@ -1,9 +1,9 @@
 <script setup>
-import TheWelcome from '../components/TheWelcome.vue'
+import CreateCall from '../components/call-form/createCall.vue'
 </script>
 
 <template>
   <main>
-    <TheWelcome />
+    <CreateCall />
   </main>
 </template>
