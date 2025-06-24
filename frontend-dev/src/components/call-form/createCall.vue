@@ -1,7 +1,105 @@
-<script setup>
-
+<script>
+export default {
+  name: 'CreerAppel',
+  data() {
+    return {
+      prenom: '',
+      nom: '',
+      uuid: '',
+      nbParticipants: '',
+      nomAppel: '',
+      error: null,
+    }
+  },
+  methods: {
+    rejoindreAppel() {
+      this.createUser()
+    },
+    createUser() {
+      fetch('http://10.102.134.228:3000/user', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          firstname: this.prenom,
+          lastname: this.nom
+        })
+      })
+        .then(res => res.json())
+        .then(data => {
+          this.uuid = data.uuid
+          console.log('User créé :', data)
+          this.createCall()
+        })
+        .catch(err => {
+          this.error = 'Erreur user : ' + err.message
+          console.error(this.error)
+        })
+    },
+    createCall() {
+      fetch('http://10.102.134.228:3000/conversation', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          userId: this.uuid,
+          maxMembers: this.nbParticipants
+        })
+      })
+        .then(res => res.json())
+        .then(data => {
+          console.log('Appel créé :', data)
+        })
+        .catch(err => {
+          this.error = 'Erreur appel : ' + err.message
+          console.error(this.error)
+        })
+    }
+  }
+}
 </script>
 
 <template>
-  <h1>Create</h1>
+  <div class="min-h-screen w-screen bg-gray-900 text-white flex items-center justify-center">
+    <div class="w-full max-w-md">
+      <h2 class="text-2xl font-bold mb-6">Créer un appel</h2>
+      
+      <div class="my-4">
+        <label class="block text-sm mb-1">Prenom</label>
+        <input v-model="prenom" type="text" placeholder="Entrer votre prénom"
+               class="w-full px-4 py-2 rounded-md bg-white text-black" />
+      </div>
+
+      <div class="my-4">
+        <label class="block text-sm mb-1">Nom</label>
+        <input v-model="nom" type="text" placeholder="Entrer votre nom"
+               class="w-full px-4 py-2 rounded-md bg-white text-black" />
+      </div>
+
+      <h2 class="text-2xl font-bold mt-8 mb-6">Paramètre de l’appel</h2>
+
+      <div class="my-4">
+        <label class="block text-sm mb-1">Number of participants</label>
+        <select v-model="nbParticipants" class="w-full px-4 py-2 rounded-md bg-white text-black">
+          <option disabled value="">Sélectionner un nombre</option>
+          <option v-for="n in 10" :key="n" :value="n">{{ n }}</option>
+        </select>
+      </div>
+
+      <div class="my-4">
+        <label class="block text-sm mb-1">Nom de l'appel</label>
+        <input v-model="nomAppel" type="text" placeholder="Entrer le nom de l’appel"
+               class="w-full px-4 py-2 rounded-md bg-white text-black" />
+      </div>
+
+      <div class="flex justify-end mt-6">
+        <button @click="rejoindreAppel"
+                class="bg-yellow-600 text-sm text-black px-4 py-2 rounded-md hover:bg-yellow-500 transition">
+          Rejoindre l'appel
+        </button>
+      </div>
+    </div>
+  </div>
 </template>
