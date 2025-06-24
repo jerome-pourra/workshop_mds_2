@@ -3,6 +3,7 @@ import { AppModule } from './app.module';
 import { Logger, ValidationPipe } from '@nestjs/common';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { getWifiIpv4Address } from './tools/network';
+import { json, urlencoded } from 'express';
 
 async function bootstrap() {
   const APP_PORT = 3000;
@@ -25,7 +26,7 @@ async function bootstrap() {
   );
   app.enableCors({
     origin: '*',
-    methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   });
 
   const config = new DocumentBuilder().setTitle('Api Documentation').build();

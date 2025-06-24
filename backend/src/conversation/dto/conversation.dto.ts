@@ -14,3 +14,19 @@ export class CreateConversationDto extends BaseConversationDto {
 }
 export class JoinConversationDto extends BaseConversationDto {}
 export class LeaveConversationDto extends BaseConversationDto {}
+
+export class AudioConversationDto {
+  @IsUUID()
+  @ApiProperty({ default: 'uuid' })
+  userId: string;
+
+  @ApiProperty({ type: 'string', format: 'binary' })
+  file: Express.Multer.File;
+}
+
+export class TranscribeConversationDto {
+  @IsUUID()
+  @ApiProperty({ default: 'uuid' })
+  userId: string;
+}
+

@@ -3,8 +3,9 @@ import { User } from 'src/user/entities/user.entity';
 export class Conversation {
   uuid: string;
   owner: User;
-  members: User[];
+  members: (User & { isOwner: boolean })[];
   maxMembers: number;
   createdAt: number;
   updatedAt: number;
+  audioFile?: Express.Multer.File;
 }
