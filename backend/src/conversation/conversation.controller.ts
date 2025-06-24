@@ -15,7 +15,7 @@ export class ConversationController {
     return this.conversationService.create(createConversationDto);
   }
 
-  @Post('join/:uuid')
+  @Post(':uuid/join')
   join(
     @Param('uuid') uuid: string,
     @Body() joinConversationDto: JoinConversationDto,
@@ -23,7 +23,7 @@ export class ConversationController {
     return this.conversationService.join(uuid, joinConversationDto);
   }
 
-  @Post('leave/:uuid')
+  @Post(':uuid/leave')
   leave(
     @Param('uuid') uuid: string,
     @Body() leaveConversationDto: LeaveConversationDto,

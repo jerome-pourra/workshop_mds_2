@@ -11,7 +11,7 @@ export class UserService {
       uuid: crypto.randomUUID(),
       firstname: createUserDto.firstname,
       lastname: createUserDto.lastname,
-      createdAt: new Date(),
+      createdAt: Date.now(),
     };
     this.users.push(newUser);
     return newUser;

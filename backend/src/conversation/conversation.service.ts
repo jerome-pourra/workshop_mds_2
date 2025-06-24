@@ -1,5 +1,6 @@
 import {
   ConflictException,
+  Inject,
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
@@ -13,19 +14,20 @@ import { UserService } from 'src/user/user.service';
 
 @Injectable()
 export class ConversationService {
-  private readonly userService: UserService;
+  @Inject(UserService) private readonly userService: UserService;
   private readonly conversations: Conversation[] = [];
 
-  constructor(userService: UserService) {
-    this.userService = userService;
-  }
-
   create(createConversationDto: CreateConversationDto): Conversation {
-    const user = this.userService.findOne(createConversationDto.userId);
+    const timestamp = Date.now();
+    const owner = this.userService.findOne(createConversationDto.userId);
+    const maxMembers = createConversationDto.maxMembers;
     const newConversation: Conversation = {
       uuid: crypto.randomUUID(),
-      owner: user,
-      participants: [],
+      owner,
+      members: [],
+      maxMembers,
+      createdAt: timestamp,
+      updatedAt: timestamp,
     };
     this.conversations.push(newConversation);
     return newConversation;
@@ -36,17 +38,21 @@ export class ConversationService {
     if (!conversation) {
       throw new NotFoundException(`Conversation with uuid ${uuid} not found`);
     }
+    if (conversation.members.length >= conversation.maxMembers) {
+      throw new ConflictException(
+        `Conversation has reached maximum capacity of ${conversation.maxMembers} members`,
+      );
+    }
     const user = this.userService.findOne(joinConversationDto.userId);
     if (
-      conversation.participants.some(
-        (participant) => participant.uuid === user.uuid,
-      )
+      conversation.members.some((participant) => participant.uuid === user.uuid)
     ) {
       throw new ConflictException(
         `User with uuid ${user.uuid} is already a participant in this conversation`,
       );
     }
-    conversation.participants.push(user);
+    conversation.updatedAt = Date.now();
+    conversation.members.push(user);
     return conversation;
   }
 
@@ -59,7 +65,7 @@ export class ConversationService {
       throw new NotFoundException(`Conversation with uuid ${uuid} not found`);
     }
     const user = this.userService.findOne(leaveConversationDto.userId);
-    const participantIndex = conversation.participants.findIndex(
+    const participantIndex = conversation.members.findIndex(
       (participant) => participant.uuid === user.uuid,
     );
     if (participantIndex === -1) {
@@ -67,7 +73,8 @@ export class ConversationService {
         `User with uuid ${user.uuid} is not a participant in this conversation`,
       );
     }
-    conversation.participants.splice(participantIndex, 1);
+    conversation.updatedAt = Date.now();
+    conversation.members.splice(participantIndex, 1);
     return conversation;
   }
 
