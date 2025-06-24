@@ -1,11 +1,11 @@
 import { Module } from '@nestjs/common';
-import { AudioHandlerService } from './audio-handler.service';
-import { AudioHandlerGateway } from './audio-handler.gateway';
+import { WebrtcGateway } from './webrtc.gateway';
+import { WebrtcService } from './webrtc.service';
 import { UserModule } from 'src/user/user.module';
 import { ConversationModule } from 'src/conversation/conversation.module';
 
 @Module({
+  providers: [WebrtcGateway, WebrtcService],
   imports: [UserModule, ConversationModule],
-  providers: [AudioHandlerGateway, AudioHandlerService],
 })
-export class AudioHandlerModule {}
+export class WebrtcModule {}

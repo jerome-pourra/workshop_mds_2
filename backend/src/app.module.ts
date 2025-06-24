@@ -1,10 +1,10 @@
 import { Module } from '@nestjs/common';
 import { UserModule } from './user/user.module';
 import { ConversationModule } from './conversation/conversation.module';
-import { AudioHandlerModule } from './audio-handler/audio-handler.module';
+import { WebrtcModule } from './webrtc/webrtc.module';
 
 @Module({
-  imports: [UserModule, ConversationModule, AudioHandlerModule],
+  imports: [UserModule, ConversationModule, WebrtcModule],
   controllers: [],
   providers: [],
 })
