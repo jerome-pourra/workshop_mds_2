@@ -112,6 +112,43 @@
 </template>
 
 <script>
+  import { useCallStore } from '../../stores/callStore'
+  import { API_SERVER_URL } from '@/main.js'
+  export default {
+  name: 'JoinCall',
+  data() {
+    return {
+      userId: '',
+      callId: '',
+    }
+  },
+  mounted() {
+    const callStore = useCallStore();
+    this.userId = callStore.userId
+    this.callId = callStore.callId
+    this.joinCall()
+  },
+  methods: {
+    joinCall() {
+      fetch(`${API_SERVER_URL}/conversation/${this.callId}/join`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          userId: this.userId,
+        }),
+      })
+        .then(response => response.json())
+        .then(data => {
+          console.log('Call joined:', data);
+        })
+        .catch(error => {
+          console.error('Error joining call:', error);
+        });
+    },
+  },
+}
 </script>
 
 <style scoped></style>
