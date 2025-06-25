@@ -1,0 +1,190 @@
+{
+  "info": {
+    "name": "Conversation API Test",
+    "description": "Test collection for Conversation API - User 1 creates conversation, User 2 joins it",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:3000",
+      "type": "string"
+    },
+    {
+      "key": "user1Id",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "user2Id",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "conversationId",
+      "value": "",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "1. Create User 1 (John)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "const responseJson = pm.response.json();",
+              "pm.collectionVariables.set('user1Id', responseJson.uuid);"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"firstname\": \"John\",\n  \"lastname\": \"Doe\"\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/user",
+          "host": ["{{baseUrl}}"],
+          "path": ["user"]
+        },
+        "description": "Create the first user (John Doe) who will create the conversation"
+      }
+    },
+    {
+      "name": "2. Create User 2 (Jane)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "const responseJson = pm.response.json();",
+              "pm.collectionVariables.set('user2Id', responseJson.uuid);"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"firstname\": \"Jane\",\n  \"lastname\": \"Smith\"\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/user",
+          "host": ["{{baseUrl}}"],
+          "path": ["user"]
+        },
+        "description": "Create the second user (Jane Smith) who will join the conversation"
+      }
+    },
+    {
+      "name": "3. User 1 Creates Conversation",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "const responseJson = pm.response.json();",
+              "pm.collectionVariables.set('conversationId', responseJson.uuid);"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"userId\": \"{{user1Id}}\"\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/conversation",
+          "host": ["{{baseUrl}}"],
+          "path": ["conversation"]
+        },
+        "description": "User 1 (John) creates a new conversation"
+      }
+    },
+    {
+      "name": "4. User 2 Joins Conversation",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"userId\": \"{{user2Id}}\"\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/conversation/{{conversationId}}/join",
+          "host": ["{{baseUrl}}"],
+          "path": ["conversation", "{{conversationId}}", "join"]
+        },
+        "description": "User 2 (Jane) joins the conversation created by User 1"
+      }
+    },
+    {
+      "name": "5. Get Conversation Details",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/conversation/{{conversationId}}",
+          "host": ["{{baseUrl}}"],
+          "path": ["conversation", "{{conversationId}}"]
+        },
+        "description": "Get the final state of the conversation to verify both users are correctly associated"
+      }
+    },
+    {
+      "name": "6. [BONUS] User 2 Leaves Conversation",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"userId\": \"{{user2Id}}\"\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/conversation/{{conversationId}}/leave",
+          "host": ["{{baseUrl}}"],
+          "path": ["conversation", "{{conversationId}}", "leave"]
+        },
+        "description": "BONUS: User 2 leaves the conversation to test the complete cycle"
+      }
+    }
+  ]
+}
