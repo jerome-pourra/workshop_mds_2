@@ -95,6 +95,11 @@ export class ConversationController {
     return this.conversationService.findOne(uuid);
   }
 
+  @Get()
+  findAll() {
+    return this.conversationService.findAll();
+  }
+
   @Delete(':uuid')
   remove(@Param('uuid') uuid: string) {
     return this.conversationService.remove(uuid);

@@ -173,6 +173,10 @@ export class ConversationService {
     return conversation;
   }
 
+  findAll(): Conversation[] {
+    return this.conversations;
+  }
+
   remove(uuid: string): { message: string } {
     const conversationIndex = this.conversations.findIndex(
       (conv) => conv.uuid === uuid,
