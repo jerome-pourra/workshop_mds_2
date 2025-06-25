@@ -1,4 +1,5 @@
 <script>
+import { API_SERVER_URL } from '@/main.js'
 export default {
   name: 'CreerAppel',
   data() {
@@ -6,7 +7,6 @@ export default {
       prenom: '',
       nom: '',
       uuid: '',
-      nbParticipants: '',
       nomAppel: '',
       error: null,
     }
@@ -16,7 +16,7 @@ export default {
       this.createUser()
     },
     createUser() {
-      fetch('http://10.102.134.228:3000/user', {
+      fetch(`${API_SERVER_URL}/user`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
@@ -38,14 +38,13 @@ export default {
         })
     },
     createCall() {
-      fetch('http://10.102.134.228:3000/conversation', {
+      fetch(`${API_SERVER_URL}/conversation`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
         },
         body: JSON.stringify({
           userId: this.uuid,
-          maxMembers: this.nbParticipants
         })
       })
         .then(res => res.json())
@@ -79,14 +78,6 @@ export default {
       </div>
 
       <h2 class="text-2xl font-bold mt-8 mb-6">Paramètre de l’appel</h2>
-
-      <div class="my-4">
-        <label class="block text-sm mb-1">Number of participants</label>
-        <select v-model="nbParticipants" class="w-full px-4 py-2 rounded-md bg-white text-black">
-          <option disabled value="">Sélectionner un nombre</option>
-          <option v-for="n in 10" :key="n" :value="n">{{ n }}</option>
-        </select>
-      </div>
 
       <div class="my-4">
         <label class="block text-sm mb-1">Nom de l'appel</label>

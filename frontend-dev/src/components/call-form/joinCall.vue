@@ -50,6 +50,7 @@
 
 <script>
 import { useCallStore } from "@/stores/callStore";
+import { API_SERVER_URL } from '@/main.js'
 export default {
   name: 'JoinCall',
   data() {
@@ -61,7 +62,7 @@ export default {
   methods: {
     createUser() {
       const callStore = useCallStore();
-      fetch('http://10.102.134.228:3000/user', {
+      fetch(`${API_SERVER_URL}/user`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
