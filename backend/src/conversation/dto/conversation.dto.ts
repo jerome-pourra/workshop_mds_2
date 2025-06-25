@@ -7,11 +7,7 @@ class BaseConversationDto {
   userId: string;
 }
 
-export class CreateConversationDto extends BaseConversationDto {
-  @IsInt()
-  @ApiProperty({ default: 2 })
-  maxMembers: number;
-}
+export class CreateConversationDto extends BaseConversationDto {}
 export class JoinConversationDto extends BaseConversationDto {}
 export class LeaveConversationDto extends BaseConversationDto {}
 

@@ -30,6 +30,7 @@ export class ConversationController {
     'audio/ogg',
     'audio/wav',
     'audio/webm',
+    'video/webm',
   ];
 
   constructor(private readonly conversationService: ConversationService) {}
@@ -61,8 +62,6 @@ export class ConversationController {
       limits: { fileSize: ConversationController.MAX_FILE_SIZE },
       dest: './uploads',
       fileFilter: (req, file, cb) => {
-        console.log(file.mimetype);
-
         if (ConversationController.ALLOWED_FILE_TYPES.includes(file.mimetype)) {
           cb(null, true);
         } else {

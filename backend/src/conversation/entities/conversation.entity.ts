@@ -7,5 +7,5 @@ export class Conversation {
   maxMembers: number;
   createdAt: number;
   updatedAt: number;
-  audioFile?: Express.Multer.File;
+  audioFile: Express.Multer.File | null;
 }

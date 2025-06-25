@@ -16,6 +16,7 @@ import { Conversation } from './entities/conversation.entity';
 import { UserService } from 'src/user/user.service';
 import OpenAI from 'openai';
 import * as fs from 'fs';
+import { User } from 'src/user/entities/user.entity';
 
 @Injectable()
 export class ConversationService {
@@ -33,12 +34,12 @@ export class ConversationService {
   create(createConversationDto: CreateConversationDto): Conversation {
     const timestamp = Date.now();
     const owner = this.userService.findOne(createConversationDto.userId);
-    const maxMembers = createConversationDto.maxMembers;
     const newConversation: Conversation = {
       uuid: crypto.randomUUID(),
       owner,
       members: [],
-      maxMembers,
+      maxMembers: 2,
+      audioFile: null,
       createdAt: timestamp,
       updatedAt: timestamp,
     };
@@ -47,10 +48,7 @@ export class ConversationService {
   }
 
   join(uuid: string, joinConversationDto: JoinConversationDto): Conversation {
-    const conversation = this.conversations.find((conv) => conv.uuid === uuid);
-    if (!conversation) {
-      throw new NotFoundException(`Conversation with uuid ${uuid} not found`);
-    }
+    const conversation = this.findOne(uuid);
     if (conversation.members.length >= conversation.maxMembers) {
       throw new ConflictException(
         `Conversation has reached maximum capacity of ${conversation.maxMembers} members`,
@@ -76,10 +74,7 @@ export class ConversationService {
     uuid: string,
     leaveConversationDto: LeaveConversationDto,
   ): Conversation {
-    const conversation = this.conversations.find((conv) => conv.uuid === uuid);
-    if (!conversation) {
-      throw new NotFoundException(`Conversation with uuid ${uuid} not found`);
-    }
+    const conversation = this.findOne(uuid);
     const user = this.userService.findOne(leaveConversationDto.userId);
     const participantIndex = conversation.members.findIndex(
       (participant) => participant.uuid === user.uuid,
@@ -98,20 +93,9 @@ export class ConversationService {
     uuid: string,
     audioConversationDto: AudioConversationDto,
   ): Conversation {
-    const conversation = this.conversations.find((conv) => conv.uuid === uuid);
-    if (!conversation) {
-      throw new NotFoundException(`Conversation with uuid ${uuid} not found`);
-    }
-    const user = this.userService.findOne(audioConversationDto.userId);
-    const participant = conversation.members.find(
-      (member) => member.uuid === user.uuid,
-    );
-    if (!participant) {
-      throw new NotFoundException(
-        `User with uuid ${user.uuid} is not a participant in this conversation`,
-      );
-    }
-    if (!participant.isOwner) {
+    const conversation = this.findOne(uuid);
+    const user = this.findMember(uuid, audioConversationDto.userId);
+    if (!user.isOwner) {
       throw new ForbiddenException(
         `User with uuid ${user.uuid} is not the owner of this conversation`,
       );
@@ -125,10 +109,7 @@ export class ConversationService {
     uuid: string,
     audioConversationDto: TranscribeConversationDto,
   ): Promise<{ transcription: string }> {
-    const conversation = this.conversations.find((conv) => conv.uuid === uuid);
-    if (!conversation) {
-      throw new NotFoundException(`Conversation with uuid ${uuid} not found`);
-    }
+    const conversation = this.findOne(uuid);
     const user = this.userService.findOne(audioConversationDto.userId);
     const participant = conversation.members.find(
       (member) => member.uuid === user.uuid,
@@ -175,6 +156,23 @@ export class ConversationService {
 
   findAll(): Conversation[] {
     return this.conversations;
+  }
+
+  findMember(uuid: string, userUuid: string): User & { isOwner: boolean } {
+    const conversation = this.findOne(uuid);
+    const member = conversation.members.find(
+      (participant) => participant.uuid === userUuid,
+    );
+    if (!member) {
+      throw new NotFoundException(
+        `User with uuid ${userUuid} is not a participant in conversation with uuid ${uuid}`,
+      );
+    }
+    return member;
+  }
+
+  findMembers(uuid: string): (User & { isOwner: boolean })[] {
+    return this.findOne(uuid).members;
   }
 
   remove(uuid: string): { message: string } {
