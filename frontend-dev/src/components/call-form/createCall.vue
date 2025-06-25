@@ -1,5 +1,8 @@
 <script>
 import { API_SERVER_URL } from '@/main.js'
+import { useCallStore } from "@/stores/callStore";
+import { useRouter } from 'vue-router'
+
 export default {
   name: 'CreerAppel',
   data() {
@@ -38,6 +41,8 @@ export default {
         })
     },
     createCall() {
+      const callStore = useCallStore();
+      const router = useRouter()
       fetch(`${API_SERVER_URL}/conversation`, {
         method: 'POST',
         headers: {
@@ -49,7 +54,10 @@ export default {
       })
         .then(res => res.json())
         .then(data => {
+          callStore.setUserId(this.uuid);
+          callStore.setCallId(data.uuid);
           console.log('Appel créé :', data)
+          this.$router.push({ name: 'call' })
         })
         .catch(err => {
           this.error = 'Erreur appel : ' + err.message
