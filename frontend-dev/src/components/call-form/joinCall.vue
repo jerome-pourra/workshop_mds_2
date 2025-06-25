@@ -2,7 +2,7 @@
   <div class="min-h-screen w-screen bg-[#2b2b2b] flex items-center justify-center relative">
     <!-- Logo -->
     <div class="absolute top-6 left-6">
-      <!-- <img src="/logo.png" alt="Logo" class="h-10 w-10" /> -->
+      <img src="../../assets/logo_dore.png" alt="Logo" class="h-10 w-10" />
     </div>
 
     <!-- Formulaire -->
@@ -49,6 +49,7 @@
 </template>
 
 <script>
+import { useCallStore } from "@/stores/callStore";
 export default {
   name: 'JoinCall',
   data() {
@@ -59,6 +60,7 @@ export default {
   },
   methods: {
     createUser() {
+      const callStore = useCallStore();
       fetch('http://10.102.134.228:3000/user', {
         method: 'POST',
         headers: {
@@ -71,6 +73,7 @@ export default {
       })
         .then(response => response.json())
         .then(data => {
+          callStore.setUser(data.userId);
           console.log('User created:', data);
         })
         .catch(error => {
