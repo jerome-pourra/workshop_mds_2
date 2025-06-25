@@ -25,6 +25,10 @@ export class UserService {
     return user;
   }
 
+  findAll(): User[] {
+    return this.users;
+  }
+
   remove(uuid: string): { message: string } {
     const userIndex = this.users.findIndex((user) => user.uuid === uuid);
     if (userIndex === -1) {

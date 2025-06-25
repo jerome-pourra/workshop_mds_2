@@ -16,6 +16,11 @@ export class UserController {
     return this.userService.findOne(uuid);
   }
 
+  @Get()
+  findAll() {
+    return this.userService.findAll();
+  }
+
   @Delete(':uuid')
   remove(@Param('uuid') uuid: string) {
     return this.userService.remove(uuid);
