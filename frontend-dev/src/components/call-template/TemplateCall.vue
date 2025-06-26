@@ -46,12 +46,26 @@ import { API_SERVER_URL } from '@/main.js'
     <div class="absolute top-6 left-6">
       <img src="../../assets/logo_dore.png" alt="Logo" class="h-10 w-10" />
     </div>
+    <button v-if="ownerUuid == userId" @click="copyUuidCall"
+      class="absolute top-6 right-6 bg-[#c5a25b] text-black text-xs px-4 py-1.5 rounded hover:bg-[#b8914c] transition">
+      Copier le lien d’invitation
+    </button>
 
     <div
       class="absolute left-4 top-1/2 -translate-y-1/2 bg-white rounded-full py-4 px-2 flex flex-col items-center space-y-4 shadow-lg"
     >
-      <button class="w-10 h-10 bg-gray-800 rounded-full flex items-center justify-center cursor-pointer">
-        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none"
+      <button class="w-10 h-10 bg-blue-500 rounded-full flex items-center justify-center cursor-pointer"
+        @click="toggleMute">
+        <svg v-if="mute" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+          stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+          class="lucide lucide-mic-off-icon lucide-mic-off">
+          <path d="M9 9v6a3 3 0 0 0 6 0V9" />
+          <path d="M12 19v3" />
+          <path d="M19 10v2a7 7 0 0 1-14 0v-2" />
+          <rect x="9" y="2" width="6" height="13" rx="3" />
+          <path d="M22 2L2 22" />
+        </svg>
+        <svg v-else xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
           stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
           class="lucide lucide-mic-icon lucide-mic">
           <path d="M12 19v3" />
@@ -79,8 +93,24 @@ import { API_SERVER_URL } from '@/main.js'
     <div
       class="absolute left-4 top-1/2 -translate-y-1/2 bg-white rounded-full py-4 px-2 flex flex-col items-center space-y-4 shadow-lg"
     >
-      <button class="w-10 h-10 bg-gray-800 rounded-full flex items-center justify-center cursor-pointer">
-       <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-mic-icon lucide-mic"><path d="M12 19v3"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><rect x="9" y="2" width="6" height="13" rx="3"/></svg>
+     <button class="w-10 h-10 bg-blue-500 rounded-full flex items-center justify-center cursor-pointer"
+        @click="toggleMute">
+        <svg v-if="mute" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+          stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+          class="lucide lucide-mic-off-icon lucide-mic-off">
+          <path d="M9 9v6a3 3 0 0 0 6 0V9" />
+          <path d="M12 19v3" />
+          <path d="M19 10v2a7 7 0 0 1-14 0v-2" />
+          <rect x="9" y="2" width="6" height="13" rx="3" />
+          <path d="M22 2L2 22" />
+        </svg>
+        <svg v-else xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+          stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+          class="lucide lucide-mic-icon lucide-mic">
+          <path d="M12 19v3" />
+          <path d="M19 10v2a7 7 0 0 1-14 0v-2" />
+          <rect x="9" y="2" width="6" height="13" rx="3" />
+        </svg>
       </button>
 
       <button class="w-10 h-10 bg-red-600 rounded-full flex items-center justify-center cursor-pointer" @click="leave">
@@ -116,6 +146,10 @@ import { API_SERVER_URL } from '@/main.js'
       Merci pour votre<br />participation !
     </div>
   </div>
+  <div v-if="showToast"
+    class="fixed top-6 right-6 bg-green-500 text-white text-sm px-4 py-2 rounded shadow transition-all duration-300">
+    {{ toastMessage }}
+  </div>
 </template>
 
 
@@ -143,6 +177,9 @@ export default {
       events: [],
       currentView: 'form', // 'form' | 'waiting' | 'call' | 'end'
       remoteUser: null,
+      mute: true,
+      showToast: false,
+      toastMessage: '',
 
       // Buffers
       pendingOffer: null,
@@ -163,6 +200,34 @@ export default {
     if (this.peer) this.peer.close();
   },
   methods: {
+    showTemporaryToast(message, duration = 3000) {
+      this.toastMessage = message
+      this.showToast = true
+      setTimeout(() => {
+        this.showToast = false
+      }, duration)
+    },
+
+    copyUuidCall() {
+      const inviteLink = this.callId
+      navigator.clipboard.writeText(inviteLink)
+        .then(() => {
+          this.showTemporaryToast("📋 Lien d'invitation copié dans le presse-papiers")
+        })
+        .catch(err => {
+          console.error("Erreur lors de la copie du lien :", err)
+          this.showTemporaryToast("❌ Erreur lors de la copie du lien", 4000)
+        })
+    },
+
+    toggleMute() {
+      this.mute = !this.mute;
+      if (this.localStream) {
+        this.localStream.getAudioTracks().forEach(track => {
+          track.enabled = !this.mute;
+        });
+      }
+    },
     async joinCall() {
       try {
         const response = await fetch(`${API_SERVER_URL}/conversation/${this.callId}/join`, {
