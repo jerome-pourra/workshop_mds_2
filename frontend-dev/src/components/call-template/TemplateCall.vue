@@ -105,16 +105,15 @@ import { API_SERVER_URL } from '@/main.js'
         {{ remoteUser?.name || 'Utilisateur connecté' }}
       </span>
     </div>
+  </div>
+  <!-- Écran de fin de l’utilisateur distant -->
+  <div v-if="currentView === 'end'" class="min-h-screen bg-[#2b2b2b] flex items-center justify-center text-white relative">
+    <div class="absolute top-6 left-6">
+      <img src="../../assets/logo_dore.png" alt="Logo" class="h-10 w-10" />
+    </div>
 
-    <!-- Écran de fin de l’utilisateur distant -->
-    <div v-if="endScreen" class="min-h-screen bg-[#2b2b2b] flex items-center justify-center text-white relative">
-      <div class="absolute top-6 left-6">
-        <img src="../../assets/logo_dore.png" alt="Logo" class="h-10 w-10" />
-      </div>
-
-      <div class="text-center text-lg text-gray-200">
-        Merci pour votre<br />participation !
-      </div>
+    <div class="text-center text-lg text-gray-200">
+      Merci pour votre<br />participation !
     </div>
   </div>
 </template>
@@ -140,10 +139,10 @@ export default {
       userId: '',
       callId: '',
       ownerUuid: '',
+      infosCall: {},
       events: [],
-      currentView: 'form', // 'form' | 'waiting' | 'call'
+      currentView: 'form', // 'form' | 'waiting' | 'call' | 'end'
       remoteUser: null,
-      endScreen: false,
 
       // Buffers
       pendingOffer: null,
@@ -177,6 +176,7 @@ export default {
 
         this.currentView = 'waiting';
         this.ownerUuid = data.owner.uuid
+        this.infosCall = data
         this.connectToSocket();
 
       } catch (error) {
@@ -213,6 +213,13 @@ export default {
       this.socket.on("leave", () => {
         this.addEvent("👤 L'autre utilisateur a quitté");
         this.remoteUser = null;
+        if(this.ownerUUid === this.userId) {
+          // Owner : l’autre a quitté → tu peux afficher un message d’attente, ou finir la room, ou auto-envoi transcript, etc.
+          this.currentView = 'end'; 
+        } else {
+          // Invité : le owner a quitté → redirige de force
+          this.$router.push({ name: 'transcript' })
+        }
       });
 
       this.socket.on("offer", async (offer) => {
@@ -341,40 +348,62 @@ export default {
       });
     },
 
-    leave() {
+    async leave() {
+      // Stopper tout
       if (this.mediaRecorder && this.isRecording) {
         this.mediaRecorder.stop();
         this.isRecording = false;
       }
-
       if (this.localStream) {
         this.localStream.getTracks().forEach(track => track.stop());
         this.localStream = null;
       }
-
       if (this.peer) {
         this.peer.close();
       }
 
-      this.socket.emit(
-        "leave",
-        {
-          userUuid: this.userId,
-          conversationUuid: this.callId,
-          data: null
-        },
-        (ack) => {
-          console.log("Le serveur a bien reçu le leave :", ack);
-        }
-      );
+      // Notifier WebSocket + API
+      this.socket.emit("leave", {
+        userUuid: this.userId,
+        conversationUuid: this.callId,
+        data: null
+      });
 
-      if(this.ownerUUid == this.userId) {
-        this.$router.push({ name: 'home' })
+      // Owner : upload audio puis route transcript
+      if (this.ownerUuid === this.userId) {
+        await this.sendAudioCall();
+        this.$router.push({ name: 'transcript', params: {conversationUuid: this.callId, userUuid: this.userId}});
       } else {
-        this.endScreen = true
+        // Invité : va sur page de fin
+        this.currentView = 'end';
       }
+
       this.isInRoom = false;
     },
+
+    async sendAudioCall() {
+      try {
+
+        console.log(this.recordedChunks[0]);
+
+        const formData = new FormData();
+        formData.append('userId', this.userId);
+        formData.append('file', this.recordedChunks[0], 'audio.webm');
+
+        const response = await fetch(`${API_SERVER_URL}/conversation/${this.infosCall.uuid}/audio`, {
+          method: 'POST',
+          // headers: { 'Content-Type': 'application/json' },
+          body: formData,
+        });
+
+        const data = await response.json();
+        console.log('Audio:', data);
+        
+      } catch (error) {
+        console.error('Erreur sendAudioCall :', error);
+      }
+    },
+
 
     addEvent(message) {
       this.events.push({ message, timestamp: Date.now() });
