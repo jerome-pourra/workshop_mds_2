@@ -66,7 +66,7 @@ import { API_SERVER_URL } from '@/main.js'
     </div>
 
     <div class="text-center text-lg text-gray-200">
-      En attente d’un<br />nouveau participant ...
+      En attente d’un<br />nouveau participant ... conversation ID {{ callId }}
     </div>
   </div>
 
@@ -275,10 +275,15 @@ export default {
       const localSource = this.audioContext.createMediaStreamSource(this.localStream);
       localSource.connect(this.destination);
 
-      this.mediaRecorder = new MediaRecorder(this.mixedStream, { mimeType: 'video/webm' });
+      this.mediaRecorder = new MediaRecorder(this.mixedStream, {
+        mimeType: 'audio/webm;codecs=opus',
+        audioBitsPerSecond: 32000
+      });
       this.recordedChunks = [];
       this.mediaRecorder.ondataavailable = (e) => {
         if (e.data.size > 0) this.recordedChunks.push(e.data);
+        console.log(`📦 Enregistrement de ${e.data.size} octets`);
+        
       };
       this.mediaRecorder.start();
       this.isRecording = true;
@@ -384,20 +389,41 @@ export default {
     async sendAudioCall() {
       try {
 
-        console.log(this.recordedChunks[0]);
+        setTimeout(async () => {          
+          console.log(this.recordedChunks);
+  
+          const conversationBlob = new Blob(this.recordedChunks, {
+            type: 'audio/webm;codecs=opus',
+            audioBitsPerSecond: 32000
+          });
+          console.log(conversationBlob);
+  
+          // Test téléchargement avec nom unique
+          const url = URL.createObjectURL(conversationBlob);
+          const link = document.createElement('a');
+          link.href = url;
+          link.download = `conversation-${this.callId}-${Date.now()}.webm`;
+          link.style.display = 'none';
+          
+          document.body.appendChild(link);
+          link.click();
+          document.body.removeChild(link);
+          URL.revokeObjectURL(url);
+  
+          const formData = new FormData();
+          formData.append('userId', this.userId);
+          formData.append('file', conversationBlob, 'audio.webm');
+  
+          const response = await fetch(`${API_SERVER_URL}/conversation/${this.infosCall.uuid}/audio`, {
+            method: 'POST',
+            // headers: { 'Content-Type': 'application/json' },
+            body: formData,
+          });
+  
+          const data = await response.json();
+          console.log('Audio:', data);
+        }, 3000);
 
-        const formData = new FormData();
-        formData.append('userId', this.userId);
-        formData.append('file', this.recordedChunks[0], 'audio.webm');
-
-        const response = await fetch(`${API_SERVER_URL}/conversation/${this.infosCall.uuid}/audio`, {
-          method: 'POST',
-          // headers: { 'Content-Type': 'application/json' },
-          body: formData,
-        });
-
-        const data = await response.json();
-        console.log('Audio:', data);
         
       } catch (error) {
         console.error('Erreur sendAudioCall :', error);
