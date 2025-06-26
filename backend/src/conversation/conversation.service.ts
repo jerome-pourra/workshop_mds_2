@@ -10,7 +10,7 @@ import {
   CreateConversationDto,
   JoinConversationDto,
   LeaveConversationDto,
-  TranscribeConversationDto,
+  TranscriptConversationDto,
 } from './dto/conversation.dto';
 import { Conversation } from './entities/conversation.entity';
 import { UserService } from 'src/user/user.service';
@@ -23,11 +23,51 @@ export class ConversationService {
   @Inject(UserService) private readonly userService: UserService;
   private readonly conversations: Conversation[] = [];
   private readonly openai: OpenAI;
+  private readonly openaiKey: string = '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';
+  private readonly openaiPrompt: string = `
+    Tu es un assistant chargé d’extraire des informations d’un entretien entre deux personnes à partir d’une transcription.
+    Objectif : produire un JSON structuré contenant uniquement les informations réellement présentes dans la transcription. Si une information est absente ou non précisée, laisse le champ correspondant vide ("" ou [] selon le type).
+    Voici le format de sortie JSON attendu :
+    {
+      "Identité": {
+        "Nom": "",
+        "Prénom": "",
+        "Âge": ""
+      },
+      "Contact": {
+        "Téléphone": "",
+        "Email": ""
+      },
+      "Expérience": {
+        "Postes_occupés": [],
+        "Durées": []
+      },
+      "Compétences": {
+        "Techniques": [],
+        "Soft_skills": []
+      },
+      "Disponibilité": {
+        "Dates": "",
+        "Contraintes": ""
+      },
+      "Prétentions": {
+        "Salaire": "",
+        "Conditions": ""
+      },
+      "Motivation": {
+        "Éléments_clés": ""
+      }
+    }
+    Règles à respecter :
+    - Ne jamais inventer de données.
+    - Si un champ n’est pas mentionné ou reste flou dans la conversation, laisse-le vide.
+    - Ne pas inclure d’analyse, seulement les données factuelles extraites.
+    - Ne pas inclure de nom de champ ou de texte supplémentaire en dehors du JSON ci-dessus.
+  `;
 
   constructor() {
     this.openai = new OpenAI({
-      apiKey:
-        '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',
+      apiKey: this.openaiKey,
     });
   }
 
@@ -105,10 +145,10 @@ export class ConversationService {
     return conversation;
   }
 
-  async transcribe(
+  async transcript(
     uuid: string,
-    audioConversationDto: TranscribeConversationDto,
-  ): Promise<{ transcription: string }> {
+    audioConversationDto: TranscriptConversationDto,
+  ): Promise<Conversation> {
     const conversation = this.findOne(uuid);
     const user = this.userService.findOne(audioConversationDto.userId);
     const participant = conversation.members.find(
@@ -140,10 +180,63 @@ export class ConversationService {
       file: fileStream,
       model: 'whisper-1',
       language: 'fr',
-      prompt: 'Transcribe this audio file in french',
+      prompt: this.openaiPrompt,
     });
 
-    return { transcription: response.text };
+    conversation.transcript = {
+      text: response.text,
+      duration: (response.usage as any).seconds ?? 0,
+    }
+    return conversation;
+  }
+
+  async formatTranscription(
+    uuid: string,
+    audioConversationDto: TranscriptConversationDto,
+  ): Promise<Conversation> {
+    const conversation = this.findOne(uuid);
+    const user = this.userService.findOne(audioConversationDto.userId);
+    const participant = conversation.members.find(
+      (member) => member.uuid === user.uuid,
+    );
+    if (!participant) {
+      throw new NotFoundException(
+        `User with uuid ${user.uuid} is not a participant in this conversation`,
+      );
+    }
+    if (!participant.isOwner) {
+      throw new ForbiddenException(
+        `User with uuid ${user.uuid} is not the owner of this conversation`,
+      );
+    }
+    if (!conversation.audioFile) {
+      throw new NotFoundException(
+        `No audio file found in conversation with uuid ${uuid}`,
+      );
+    }
+
+    let fileStream = fs.createReadStream(conversation.audioFile.path);
+    fileStream = Object.assign(fileStream, {
+      name: conversation.audioFile.originalname,
+      type: conversation.audioFile.mimetype,
+    });
+
+    const response = await this.openai.chat.completions.create({
+      model: 'gpt-4-turbo',
+      messages: [
+        {
+          role: 'system',
+          content: this.openaiPrompt
+        },
+        {
+          role: 'user',
+          content: `Voici la transcription à analyser : ${conversation.transcript?.text}`,
+        }
+      ],
+    });
+
+    conversation.formattedTranscript = JSON.parse(response.choices[0].message.content ?? '{}');
+    return conversation;
   }
 
   findOne(uuid: string): Conversation {

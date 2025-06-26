@@ -11,9 +11,10 @@ import {
 import { ConversationService } from './conversation.service';
 import {
   CreateConversationDto,
+  FormatTranscriptConversationDto,
   JoinConversationDto,
   LeaveConversationDto,
-  TranscribeConversationDto,
+  TranscriptConversationDto,
 } from './dto/conversation.dto';
 import { FileInterceptor } from '@nestjs/platform-express';
 
@@ -33,7 +34,7 @@ export class ConversationController {
     'video/webm',
   ];
 
-  constructor(private readonly conversationService: ConversationService) {}
+  constructor(private readonly conversationService: ConversationService) { }
 
   @Post()
   create(@Body() createConversationDto: CreateConversationDto) {
@@ -81,12 +82,20 @@ export class ConversationController {
     });
   }
 
-  @Post(':uuid/transcribe')
-  transcribe(
+  @Post(':uuid/transcript')
+  transcript(
     @Param('uuid') uuid: string,
-    @Body() body: TranscribeConversationDto,
+    @Body() body: TranscriptConversationDto,
   ) {
-    return this.conversationService.transcribe(uuid, body);
+    return this.conversationService.transcript(uuid, body);
+  }
+
+  @Post(':uuid/format-transcript')
+  formatTranscript(
+    @Param('uuid') uuid: string,
+    @Body() body: FormatTranscriptConversationDto,
+  ) {
+    return this.conversationService.formatTranscription(uuid, body);
   }
 
   @Get(':uuid')
