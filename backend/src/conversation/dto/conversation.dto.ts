@@ -7,9 +7,9 @@ class BaseConversationDto {
   userId: string;
 }
 
-export class CreateConversationDto extends BaseConversationDto {}
-export class JoinConversationDto extends BaseConversationDto {}
-export class LeaveConversationDto extends BaseConversationDto {}
+export class CreateConversationDto extends BaseConversationDto { }
+export class JoinConversationDto extends BaseConversationDto { }
+export class LeaveConversationDto extends BaseConversationDto { }
 
 export class AudioConversationDto {
   @IsUUID()
@@ -20,8 +20,11 @@ export class AudioConversationDto {
   file: Express.Multer.File;
 }
 
-export class TranscribeConversationDto {
+export class BaseTranscriptDto {
   @IsUUID()
   @ApiProperty({ default: 'uuid' })
   userId: string;
 }
+
+export class TranscriptConversationDto extends BaseTranscriptDto { }
+export class FormatTranscriptConversationDto extends BaseTranscriptDto { }

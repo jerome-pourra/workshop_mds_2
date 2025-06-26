@@ -1,3 +1,7 @@
+<script setup>
+import { API_SERVER_URL } from '@/main.js'
+</script>
+
 <template>
   <!-- Formulaire de connexion -->
   <div v-if="currentView === 'form'" class="min-h-screen bg-[#2b2b2b] flex items-center justify-center px-4 text-white">

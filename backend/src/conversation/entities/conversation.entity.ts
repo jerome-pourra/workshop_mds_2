@@ -8,4 +8,9 @@ export class Conversation {
   createdAt: number;
   updatedAt: number;
   audioFile: Express.Multer.File | null;
+  transcript?: {
+    text: string;
+    duration: number;
+  };
+  formattedTranscript?: string | null;
 }
