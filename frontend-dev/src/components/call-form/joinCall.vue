@@ -74,8 +74,9 @@ export default {
       })
         .then(response => response.json())
         .then(data => {
-          callStore.setUser(data.userId);
+          callStore.setUserId(data.uuid);
           console.log('User created:', data);
+          this.$router.push({ name: 'call' })
         })
         .catch(error => {
           console.error('Error creating user:', error);
