@@ -6,8 +6,58 @@
 - Esteban
 
 ## Description
+Application web d'appels vocaux avec transcription automatique et formatage intelligent des entretiens. L'application permet de créer des appels entre deux personnes, d'enregistrer les conversations et de générer des transcriptions structurées.
+
+## Architecture Technique
+
+### Frontend
+- **Framework :** Vue.js 3 + Vite
+- **Styling :** TailwindCSS 4
+- **State Management :** Pinia
+- **Routing :** Vue Router 4
+- **WebRTC :** Communication temps réel
+- **Socket.IO :** Communication bidirectionnelle
+
+### Backend  
+- **Framework :** NestJS (Node.js)
+- **WebSockets :** Socket.IO
+- **Upload :** Multer
+- **IA :** OpenAI API
+- **Documentation :** Swagger
+
+### Routes API Principales
+```
+POST /conversation/:uuid/join       # Rejoindre un appel
+POST /conversation/:uuid/audio      # Upload audio
+POST /conversation/:uuid/transcript # Générer transcription
+POST /conversation/:uuid/format-transcript # Formater transcription
+GET  /conversation/:uuid            # Récupérer infos appel
+GET  /user/:uuid                    # Infos utilisateur
+```
+
+### Routes Frontend
+```
+/                                   # Page d'accueil
+/join                              # Rejoindre un appel  
+/call                              # Interface d'appel
+/transcript/:conversationUuid/:userUuid # Transcription
+```
 
 ## Lancement du projet
+
+### Backend
+```bash
+cd backend
+npm install
+npm run start:dev  # Port 3000
+```
+
+### Frontend
+```bash
+cd frontend-dev
+npm install
+npm run dev       # Port 5173
+```
 
 ## Guide de contribution
 
