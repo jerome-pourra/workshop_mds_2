@@ -464,16 +464,16 @@ export default {
           console.log(conversationBlob);
   
           // Test téléchargement avec nom unique
-          const url = URL.createObjectURL(conversationBlob);
-          const link = document.createElement('a');
-          link.href = url;
-          link.download = `conversation-${this.callId}-${Date.now()}.webm`;
-          link.style.display = 'none';
+          // const url = URL.createObjectURL(conversationBlob);
+          // const link = document.createElement('a');
+          // link.href = url;
+          // link.download = `conversation-${this.callId}-${Date.now()}.webm`;
+          // link.style.display = 'none';
           
-          document.body.appendChild(link);
-          link.click();
-          document.body.removeChild(link);
-          URL.revokeObjectURL(url);
+          // document.body.appendChild(link);
+          // link.click();
+          // document.body.removeChild(link);
+          // URL.revokeObjectURL(url);
   
           const formData = new FormData();
           formData.append('userId', this.userId);
