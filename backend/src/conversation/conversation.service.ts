@@ -176,14 +176,10 @@ export class ConversationService {
       type: conversation.audioFile.mimetype,
     });
 
-    console.log("ICI tete de cul !");
-    
-
     const response = await this.openai.audio.transcriptions.create({
       file: fileStream,
       model: 'whisper-1',
       language: 'fr',
-      prompt: this.openaiPrompt,
     });
 
     conversation.transcript = {
@@ -217,8 +213,6 @@ export class ConversationService {
         `No audio file found in conversation with uuid ${uuid}`,
       );
     }
-
-    console.log("ICI aussi tete de cul !");
 
     let fileStream = fs.createReadStream(conversation.audioFile.path);
     fileStream = Object.assign(fileStream, {
