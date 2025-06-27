@@ -12,7 +12,7 @@ import { API_SERVER_URL } from '@/main.js'
             <path d="M12 12c2.67 0 8 1.34 8 4v2H4v-2c0-2.66 5.33-4 8-4zm0-2a4 4 0 100-8 4 4 0 000 8z" />
           </svg>
         </div>
-        <span class="text-lg font-medium">{{this.firstname}} {{this.name}}</span>
+        <span class="text-lg font-medium">{{ guestFirstname }} {{ guestLastname }}</span>
       </div>
 
       <div class="h-10 w-px bg-gray-500"></div>
@@ -80,7 +80,7 @@ import { API_SERVER_URL } from '@/main.js'
     </div>
 
     <div class="text-center text-lg text-gray-200">
-      En attente d’un<br />nouveau participant ... conversation ID {{ callId }}
+      En attente d’un<br />nouveau participant ...
     </div>
   </div>
 
@@ -131,8 +131,10 @@ import { API_SERVER_URL } from '@/main.js'
           <path d="M12 12c2.7 0 5.5 1.34 5.5 4v2H6.5v-2c0-2.66 2.8-4 5.5-4zm0-2a4 4 0 100-8 4 4 0 000 8z" />
         </svg>
       </div>
-      <span class="mt-2 text-sm">
-        {{ remoteUser?.name || 'Utilisateur connecté' }}
+      <span v-for="member in infosCall.members" :key="member.uuid">
+        <span v-if="member.uuid !== userId">
+          <span>{{ member.firstname }} {{ member.lastname }}</span>
+        </span>
       </span>
     </div>
   </div>
@@ -155,6 +157,7 @@ import { API_SERVER_URL } from '@/main.js'
 
 <script>
   import { useCallStore } from '../../stores/callStore'
+  import { useNameStore } from '../../stores/callStore'
   import { API_SERVER_URL } from '@/main.js'
 export default {
   name: 'JoinCall',
@@ -170,6 +173,10 @@ export default {
       isRecording: false,
       mixedStream: null,
       isInRoom: false,
+      guestFirstname: '',
+      guestLastname: '',
+      ownerFirstname: '',
+      ownerLastname: '',
       userId: '',
       callId: '',
       ownerUuid: '',
@@ -188,8 +195,13 @@ export default {
   },
   mounted() {
     const callStore = useCallStore();
+    const nameStore = useNameStore();
     this.userId = callStore.userId;
     this.callId = callStore.callId;
+    this.ownerFirstname = nameStore.owner.firstname;
+    this.ownerLastname = nameStore.owner.lastname;
+    this.guestFirstname = nameStore.guest.firstname;
+    this.guestLastname = nameStore.guest.lastname;
 
     if (this.callId && this.userId) {
       this.joinCall();
@@ -249,6 +261,23 @@ export default {
       }
     },
 
+    async getCall() {
+        try {
+        const response = await fetch(`${API_SERVER_URL}/conversation/${this.callId}`, {
+          method: 'GET',
+          headers: { 'Content-Type': 'application/json' }
+        });
+
+        const data = await response.json();
+        console.log('Call infos:', data);
+
+        this.infosCall = data
+
+      } catch (error) {
+        console.error('Erreur infos call :', error);
+      }
+    },
+
     connectToSocket() {
       this.socket = io(`${API_SERVER_URL}/webrtc`, { transports: ['websocket'] });
 
@@ -267,6 +296,7 @@ export default {
       this.socket.on("join", async (user) => {
         this.addEvent("👤 Autre utilisateur a rejoint");
 
+        this.getCall()
         this.remoteUser = user;
         this.currentView = 'call';
 
