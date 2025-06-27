@@ -50,6 +50,7 @@
 
 <script>
 import { useCallStore } from "@/stores/callStore";
+import { useNameStore } from "@/stores/callStore";
 import { API_SERVER_URL } from '@/main.js'
 export default {
   name: 'JoinCall',
@@ -62,6 +63,7 @@ export default {
   methods: {
     createUser() {
       const callStore = useCallStore();
+      const nameStore = useNameStore();
       fetch(`${API_SERVER_URL}/user`, {
         method: 'POST',
         headers: {
@@ -75,6 +77,8 @@ export default {
         .then(response => response.json())
         .then(data => {
           callStore.setUserId(data.uuid);
+          nameStore.setFirstnameGuest(this.firstname);
+          nameStore.setLastnameGuest(this.lastname);
           console.log('User created:', data);
           this.$router.push({ name: 'call' })
         })

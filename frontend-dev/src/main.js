@@ -5,7 +5,7 @@ import App from './App.vue'
 import { createPinia } from 'pinia'
 import router from './router'
 
-export const API_SERVER_URL = 'http://localhost:3000'
+export const API_SERVER_URL = 'http://10.102.134.228:3000'
 const app = createApp(App)
 
 const pinia = createPinia()

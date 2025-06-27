@@ -12,7 +12,7 @@ import { API_SERVER_URL } from '@/main.js'
             <path d="M12 12c2.67 0 8 1.34 8 4v2H4v-2c0-2.66 5.33-4 8-4zm0-2a4 4 0 100-8 4 4 0 000 8z" />
           </svg>
         </div>
-        <span class="text-lg font-medium">{{this.firstname}} {{this.name}}</span>
+        <span class="text-lg font-medium">{{ guestFirstname }} {{ guestLastname }}</span>
       </div>
 
       <div class="h-10 w-px bg-gray-500"></div>
@@ -46,12 +46,26 @@ import { API_SERVER_URL } from '@/main.js'
     <div class="absolute top-6 left-6">
       <img src="../../assets/logo_dore.png" alt="Logo" class="h-10 w-10" />
     </div>
+    <button v-if="ownerUuid == userId" @click="copyUuidCall"
+      class="absolute top-6 right-6 bg-[#c5a25b] text-black text-xs px-4 py-1.5 rounded hover:bg-[#b8914c] transition">
+      Copier le lien d’invitation
+    </button>
 
     <div
       class="absolute left-4 top-1/2 -translate-y-1/2 bg-white rounded-full py-4 px-2 flex flex-col items-center space-y-4 shadow-lg"
     >
-      <button class="w-10 h-10 bg-gray-800 rounded-full flex items-center justify-center cursor-pointer">
-        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none"
+      <button class="w-10 h-10 bg-blue-500 rounded-full flex items-center justify-center cursor-pointer"
+        @click="toggleMute">
+        <svg v-if="mute" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+          stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+          class="lucide lucide-mic-off-icon lucide-mic-off">
+          <path d="M9 9v6a3 3 0 0 0 6 0V9" />
+          <path d="M12 19v3" />
+          <path d="M19 10v2a7 7 0 0 1-14 0v-2" />
+          <rect x="9" y="2" width="6" height="13" rx="3" />
+          <path d="M22 2L2 22" />
+        </svg>
+        <svg v-else xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
           stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
           class="lucide lucide-mic-icon lucide-mic">
           <path d="M12 19v3" />
@@ -79,8 +93,24 @@ import { API_SERVER_URL } from '@/main.js'
     <div
       class="absolute left-4 top-1/2 -translate-y-1/2 bg-white rounded-full py-4 px-2 flex flex-col items-center space-y-4 shadow-lg"
     >
-      <button class="w-10 h-10 bg-gray-800 rounded-full flex items-center justify-center cursor-pointer">
-       <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-mic-icon lucide-mic"><path d="M12 19v3"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><rect x="9" y="2" width="6" height="13" rx="3"/></svg>
+     <button class="w-10 h-10 bg-blue-500 rounded-full flex items-center justify-center cursor-pointer"
+        @click="toggleMute">
+        <svg v-if="mute" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+          stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+          class="lucide lucide-mic-off-icon lucide-mic-off">
+          <path d="M9 9v6a3 3 0 0 0 6 0V9" />
+          <path d="M12 19v3" />
+          <path d="M19 10v2a7 7 0 0 1-14 0v-2" />
+          <rect x="9" y="2" width="6" height="13" rx="3" />
+          <path d="M22 2L2 22" />
+        </svg>
+        <svg v-else xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+          stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+          class="lucide lucide-mic-icon lucide-mic">
+          <path d="M12 19v3" />
+          <path d="M19 10v2a7 7 0 0 1-14 0v-2" />
+          <rect x="9" y="2" width="6" height="13" rx="3" />
+        </svg>
       </button>
 
       <button class="w-10 h-10 bg-red-600 rounded-full flex items-center justify-center cursor-pointer" @click="leave">
@@ -101,27 +131,33 @@ import { API_SERVER_URL } from '@/main.js'
           <path d="M12 12c2.7 0 5.5 1.34 5.5 4v2H6.5v-2c0-2.66 2.8-4 5.5-4zm0-2a4 4 0 100-8 4 4 0 000 8z" />
         </svg>
       </div>
-      <span class="mt-2 text-sm">
-        {{ remoteUser?.name || 'Utilisateur connecté' }}
+      <span v-for="member in infosCall.members" :key="member.uuid">
+        <span v-if="member.uuid !== userId">
+          <span>{{ member.firstname }} {{ member.lastname }}</span>
+        </span>
       </span>
     </div>
-
-    <!-- Écran de fin de l’utilisateur distant -->
-    <div v-if="endScreen" class="min-h-screen bg-[#2b2b2b] flex items-center justify-center text-white relative">
-      <div class="absolute top-6 left-6">
-        <img src="../../assets/logo_dore.png" alt="Logo" class="h-10 w-10" />
-      </div>
-
-      <div class="text-center text-lg text-gray-200">
-        Merci pour votre<br />participation !
-      </div>
+  </div>
+  <!-- Écran de fin de l’utilisateur distant -->
+  <div v-if="currentView === 'end'" class="min-h-screen bg-[#2b2b2b] flex items-center justify-center text-white relative">
+    <div class="absolute top-6 left-6">
+      <img src="../../assets/logo_dore.png" alt="Logo" class="h-10 w-10" />
     </div>
+
+    <div class="text-center text-lg text-gray-200">
+      Merci pour votre<br />participation !
+    </div>
+  </div>
+  <div v-if="showToast"
+    class="fixed top-6 right-6 bg-green-500 text-white text-sm px-4 py-2 rounded shadow transition-all duration-300">
+    {{ toastMessage }}
   </div>
 </template>
 
 
 <script>
   import { useCallStore } from '../../stores/callStore'
+  import { useNameStore } from '../../stores/callStore'
   import { API_SERVER_URL } from '@/main.js'
 export default {
   name: 'JoinCall',
@@ -137,13 +173,20 @@ export default {
       isRecording: false,
       mixedStream: null,
       isInRoom: false,
+      guestFirstname: '',
+      guestLastname: '',
+      ownerFirstname: '',
+      ownerLastname: '',
       userId: '',
       callId: '',
       ownerUuid: '',
+      infosCall: {},
       events: [],
-      currentView: 'form', // 'form' | 'waiting' | 'call'
+      currentView: 'form', // 'form' | 'waiting' | 'call' | 'end'
       remoteUser: null,
-      endScreen: false,
+      mute: true,
+      showToast: false,
+      toastMessage: '',
 
       // Buffers
       pendingOffer: null,
@@ -152,8 +195,13 @@ export default {
   },
   mounted() {
     const callStore = useCallStore();
+    const nameStore = useNameStore();
     this.userId = callStore.userId;
     this.callId = callStore.callId;
+    this.ownerFirstname = nameStore.owner.firstname;
+    this.ownerLastname = nameStore.owner.lastname;
+    this.guestFirstname = nameStore.guest.firstname;
+    this.guestLastname = nameStore.guest.lastname;
 
     if (this.callId && this.userId) {
       this.joinCall();
@@ -164,6 +212,34 @@ export default {
     if (this.peer) this.peer.close();
   },
   methods: {
+    showTemporaryToast(message, duration = 3000) {
+      this.toastMessage = message
+      this.showToast = true
+      setTimeout(() => {
+        this.showToast = false
+      }, duration)
+    },
+
+    copyUuidCall() {
+      const inviteLink = this.callId
+      navigator.clipboard.writeText(inviteLink)
+        .then(() => {
+          this.showTemporaryToast("📋 Lien d'invitation copié dans le presse-papiers")
+        })
+        .catch(err => {
+          console.error("Erreur lors de la copie du lien :", err)
+          this.showTemporaryToast("❌ Erreur lors de la copie du lien", 4000)
+        })
+    },
+
+    toggleMute() {
+      this.mute = !this.mute;
+      if (this.localStream) {
+        this.localStream.getAudioTracks().forEach(track => {
+          track.enabled = !this.mute;
+        });
+      }
+    },
     async joinCall() {
       try {
         const response = await fetch(`${API_SERVER_URL}/conversation/${this.callId}/join`, {
@@ -177,10 +253,28 @@ export default {
 
         this.currentView = 'waiting';
         this.ownerUuid = data.owner.uuid
+        this.infosCall = data
         this.connectToSocket();
 
       } catch (error) {
         console.error('Erreur joinCall :', error);
+      }
+    },
+
+    async getCall() {
+        try {
+        const response = await fetch(`${API_SERVER_URL}/conversation/${this.callId}`, {
+          method: 'GET',
+          headers: { 'Content-Type': 'application/json' }
+        });
+
+        const data = await response.json();
+        console.log('Call infos:', data);
+
+        this.infosCall = data
+
+      } catch (error) {
+        console.error('Erreur infos call :', error);
       }
     },
 
@@ -202,6 +296,7 @@ export default {
       this.socket.on("join", async (user) => {
         this.addEvent("👤 Autre utilisateur a rejoint");
 
+        this.getCall()
         this.remoteUser = user;
         this.currentView = 'call';
 
@@ -213,6 +308,13 @@ export default {
       this.socket.on("leave", () => {
         this.addEvent("👤 L'autre utilisateur a quitté");
         this.remoteUser = null;
+        if(this.ownerUUid === this.userId) {
+          // Owner : l’autre a quitté → tu peux afficher un message d’attente, ou finir la room, ou auto-envoi transcript, etc.
+          this.currentView = 'end'; 
+        } else {
+          // Invité : le owner a quitté → redirige de force
+          this.$router.push({ name: 'transcript' })
+        }
       });
 
       this.socket.on("offer", async (offer) => {
@@ -268,10 +370,15 @@ export default {
       const localSource = this.audioContext.createMediaStreamSource(this.localStream);
       localSource.connect(this.destination);
 
-      this.mediaRecorder = new MediaRecorder(this.mixedStream, { mimeType: 'video/webm' });
+      this.mediaRecorder = new MediaRecorder(this.mixedStream, {
+        mimeType: 'audio/webm;codecs=opus',
+        audioBitsPerSecond: 32000
+      });
       this.recordedChunks = [];
       this.mediaRecorder.ondataavailable = (e) => {
         if (e.data.size > 0) this.recordedChunks.push(e.data);
+        console.log(`📦 Enregistrement de ${e.data.size} octets`);
+        
       };
       this.mediaRecorder.start();
       this.isRecording = true;
@@ -341,40 +448,83 @@ export default {
       });
     },
 
-    leave() {
+    async leave() {
+      // Stopper tout
       if (this.mediaRecorder && this.isRecording) {
         this.mediaRecorder.stop();
         this.isRecording = false;
       }
-
       if (this.localStream) {
         this.localStream.getTracks().forEach(track => track.stop());
         this.localStream = null;
       }
-
       if (this.peer) {
         this.peer.close();
       }
 
-      this.socket.emit(
-        "leave",
-        {
-          userUuid: this.userId,
-          conversationUuid: this.callId,
-          data: null
-        },
-        (ack) => {
-          console.log("Le serveur a bien reçu le leave :", ack);
-        }
-      );
+      // Notifier WebSocket + API
+      this.socket.emit("leave", {
+        userUuid: this.userId,
+        conversationUuid: this.callId,
+        data: null
+      });
 
-      if(this.ownerUUid == this.userId) {
-        this.$router.push({ name: 'home' })
+      // Owner : upload audio puis route transcript
+      if (this.ownerUuid === this.userId) {
+        await this.sendAudioCall();
+        this.$router.push({ name: 'transcript', params: {conversationUuid: this.callId, userUuid: this.userId}});
       } else {
-        this.endScreen = true
+        // Invité : va sur page de fin
+        this.currentView = 'end';
       }
+
       this.isInRoom = false;
     },
+
+    async sendAudioCall() {
+      try {
+
+        setTimeout(async () => {          
+          console.log(this.recordedChunks);
+  
+          const conversationBlob = new Blob(this.recordedChunks, {
+            type: 'audio/webm;codecs=opus',
+            audioBitsPerSecond: 32000
+          });
+          console.log(conversationBlob);
+  
+          // Test téléchargement avec nom unique
+          // const url = URL.createObjectURL(conversationBlob);
+          // const link = document.createElement('a');
+          // link.href = url;
+          // link.download = `conversation-${this.callId}-${Date.now()}.webm`;
+          // link.style.display = 'none';
+          
+          // document.body.appendChild(link);
+          // link.click();
+          // document.body.removeChild(link);
+          // URL.revokeObjectURL(url);
+  
+          const formData = new FormData();
+          formData.append('userId', this.userId);
+          formData.append('file', conversationBlob, 'audio.webm');
+  
+          const response = await fetch(`${API_SERVER_URL}/conversation/${this.infosCall.uuid}/audio`, {
+            method: 'POST',
+            // headers: { 'Content-Type': 'application/json' },
+            body: formData,
+          });
+  
+          const data = await response.json();
+          console.log('Audio:', data);
+        }, 3000);
+
+        
+      } catch (error) {
+        console.error('Erreur sendAudioCall :', error);
+      }
+    },
+
 
     addEvent(message) {
       this.events.push({ message, timestamp: Date.now() });

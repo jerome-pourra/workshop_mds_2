@@ -180,7 +180,6 @@ export class ConversationService {
       file: fileStream,
       model: 'whisper-1',
       language: 'fr',
-      prompt: this.openaiPrompt,
     });
 
     conversation.transcript = {

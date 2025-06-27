@@ -1,9 +1,14 @@
 <script setup>
 import { ref, onMounted } from 'vue'
 import { API_SERVER_URL } from '@/main.js'
+import { useRoute } from 'vue-router';
 
-const conversationUuid = "9776aa4c-17e3-4519-bd64-9c4bf844c99d" // FIXME Get from store data
-const userUuid = "37dee37a-6bfd-47fa-9dfa-3797332c935f" // FIXME Get from store data
+const route = useRoute();
+const conversationUuid = route.params.conversationUuid;
+const userUuid = route.params.userUuid;
+
+console.log(conversationUuid);
+console.log(userUuid);
 
 const conversation = ref(null)
 const person_1 = ref(null)
@@ -32,6 +37,8 @@ const fetchConversation = async () => {
     }
 
     const jsonResponse = await response.json()
+    console.log(jsonResponse);
+    
     conversation.value = jsonResponse;
     person_1.value = jsonResponse.members[0];
     person_2.value = jsonResponse.members[1];
@@ -47,6 +54,8 @@ const fetchConversation = async () => {
     console.error('Error fetching conversation:', err)
   } finally {
     loading.value = false
+    console.log('finnaly');
+    
   }
 }
 

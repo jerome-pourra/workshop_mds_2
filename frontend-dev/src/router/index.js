@@ -23,7 +23,7 @@ const router = createRouter({
       component: HomeView,
     },
     {
-      path: '/transcript',
+      path: '/transcript/:conversationUuid/:userUuid',
       name: 'transcript',
       component: Transcript,
     },
